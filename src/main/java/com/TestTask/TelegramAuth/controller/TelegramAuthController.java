@@ -17,8 +17,15 @@ public class TelegramAuthController {
     public String index(@RequestParam String first_name,
                         @RequestParam String last_name,
                         @RequestParam String username,
+                        @RequestParam String data,
                         Model model) {
         System.out.println("Received data: first_name=" + first_name + ", last_name=" + last_name + ", username=" + username);
+
+
+        String secret = "${telegram.bot.token}";
+        if (!telegramAuthService.validateTelegramData(data, secret)) {
+            return "error";
+        }
 
         User user = telegramAuthService.authenticateUser(first_name, last_name, username);
 
@@ -31,5 +38,13 @@ public class TelegramAuthController {
         model.addAttribute("user", user);
         return "index";
     }
-}
 
+    @GetMapping("/webapp")
+    public String webApp(@RequestParam String data, Model model) {
+        // Обработка данных, полученных от WebApp
+        System.out.println("Received data from WebApp: " + data);
+
+        model.addAttribute("data", data);
+        return "webapp"; // Возвращаем имя HTML-шаблона
+    }
+}
