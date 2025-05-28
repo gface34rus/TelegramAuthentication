@@ -8,43 +8,29 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
+
+
 @Controller
 public class TelegramAuthController {
     @Autowired
     private TelegramAuthService telegramAuthService;
 
     @GetMapping("/")
-    public String index(@RequestParam String first_name,
-                        @RequestParam String last_name,
-                        @RequestParam String username,
-                        @RequestParam String data,
-                        Model model) {
-        System.out.println("Received data: first_name=" + first_name + ", last_name=" + last_name + ", username=" + username);
+    public String authenticateUser(@RequestParam String initData, Model model) {
+        if (telegramAuthService.validateTelegramData(initData, "${telegram.bot.token}")) {
+            Map<String, String> dataMap = telegramAuthService.parseInitData(initData);
 
+            // Создайте объект User и заполните его данными
+            User user = new User();
+            user.setFirstName(dataMap.get("first_name"));
+            user.setLastName(dataMap.get("last_name"));
+            user.setUsername(dataMap.get("username"));
 
-        String secret = "${telegram.bot.token}";
-        if (!telegramAuthService.validateTelegramData(data, secret)) {
-            return "error";
-        }
-
-        User user = telegramAuthService.authenticateUser(first_name, last_name, username);
-
-        if (user != null) {
-            System.out.println("User found or created: " + user);
+            model.addAttribute("user", user);
+            return "index"; // Возвращает HTML-шаблон с данными пользователя
         } else {
-            System.out.println("User not found.");
+            return "error"; // Возвращает страницу ошибки
         }
-
-        model.addAttribute("user", user);
-        return "index";
-    }
-
-    @GetMapping("/webapp")
-    public String webApp(@RequestParam String data, Model model) {
-        // Обработка данных, полученных от WebApp
-        System.out.println("Received data from WebApp: " + data);
-
-        model.addAttribute("data", data);
-        return "webapp"; // Возвращаем имя HTML-шаблона
     }
 }
