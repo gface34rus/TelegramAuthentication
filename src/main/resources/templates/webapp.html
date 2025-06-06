@@ -1,12 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram WebApp</title>
+    <link href="/static/css/output.css" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body>
-    <h1>Welcome to Telegram WebApp</h1>
-    <p>Data received: <span th:text="${data}"></span></p>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<div id="loading" class="text-center p-8 text-gray-600">Authenticating...</div>
+<div id="userInfo" class="hidden max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 m-4"></div>
+<script>
+    const webapp = window.Telegram.WebApp;
+    webapp.ready();
+    const initData = webapp.initData;
+    if (!initData) {
+        document.getElementById('loading').textContent = 'Ошибка: нет данных инициализации';
+    } else {
+        fetch('/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(new URLSearchParams(initData)))
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Ошибка аутентификации');
+            return response.json();
+        })
+        .then(user => {
+            document.getElementById('loading').style.display = 'none';
+            const userInfo = document.getElementById('userInfo');
+            userInfo.classList.remove('hidden');
+            userInfo.innerHTML = `
+                <div class="text-center">
+                    ${user.photoUrl ? `<img src="${user.photoUrl}" alt="Profile Photo" class="w-24 h-24 rounded-full mx-auto mb-4">` : ''}
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Добро пожаловать, ${user.firstName || 'Пользователь'}!</h2>
+                    <div class="mb-2 text-gray-600">ID: ${user.id}</div>
+                    ${user.username ? `<div class="mb-2 text-gray-600">@${user.username}</div>` : ''}
+                    ${user.firstName ? `<div class="mb-2 text-gray-600">Имя: ${user.firstName}</div>` : ''}
+                    ${user.lastName ? `<div class="mb-2 text-gray-600">Фамилия: ${user.lastName}</div>` : ''}
+                </div>
+            `;
+            webapp.MainButton.setText('Закрыть').show().onClick(() => webapp.close());
+        })
+        .catch(error => {
+            document.getElementById('loading').textContent = 'Ошибка: ' + error.message;
+        });
+    }
+</script>
 </body>
 </html>

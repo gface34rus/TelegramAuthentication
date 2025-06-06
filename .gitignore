@@ -36,3 +36,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node.js ###
+node_modules/
+node/
+src/main/resources/static/css/output.css
+
+### H2 Database ###
+*.db
+telegramauth.*

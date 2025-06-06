@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Information</title>
+    <link href="/webjars/tailwindcss/2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div th:if="${user}" class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 m-4">
+        <div class="text-center">
+            <img th:if="${user.photoUrl}" th:src="${user.photoUrl}" alt="Profile Photo" class="w-24 h-24 rounded-full mx-auto mb-4">
+            <h2 th:text="'Welcome, ' + ${user.firstName ?: 'User'} + '!'" class="text-2xl font-bold text-gray-800 mb-4">Welcome!</h2>
+            <p th:if="${user.username}" th:text="'@' + ${user.username}" class="text-gray-600 mb-2">@username</p>
+            <p th:if="${user.firstName}" th:text="'First Name: ' + ${user.firstName}" class="text-gray-600 mb-2">First Name: John</p>
+            <p th:if="${user.lastName}" th:text="'Last Name: ' + ${user.lastName}" class="text-gray-600 mb-2">Last Name: Doe</p>
+            <p th:if="${user.languageCode}" th:text="'Language: ' + ${user.languageCode}" class="text-gray-600 mb-2">Language: en</p>
+            <p th:text="'Last Authentication: ' + ${#dates.format(new java.util.Date(user.authDate * 1000), 'dd-MM-yyyy HH:mm:ss')}" class="text-gray-600 mb-2">
+                Last Authentication: 01-01-2024 12:00:00
+            </p>
+        </div>
+    </div>
+    <div th:unless="${user}" class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 m-4">
+        <div class="text-center text-red-600">
+            <h2 class="text-2xl font-bold mb-2">User not found</h2>
+            <p>The requested user information could not be found.</p>
+        </div>
+    </div>
+</body>
+</html> 
